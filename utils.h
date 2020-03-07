@@ -1,0 +1,63 @@
+#include <cmath>
+#include <array>
+#include <random>
+
+namespace NN
+{
+
+using f_type = double;
+
+template<size_t N>
+using sample_type = std::pair<std::array<f_type, N>, f_type>;
+
+template<size_t N, size_t M>
+using array2D = std::array<std::array<f_type, M>, N>;
+
+template <size_t N>
+constexpr std::array<f_type, N> get_waves(size_t start_point) noexcept
+{
+    std::array<f_type, N> data;
+
+    for (size_t i = start_point; i < N + start_point; ++i) {
+        data[i] = std::sin(i);
+    }
+
+    return data;
+}
+
+template<size_t N, size_t seq_length>
+std::array<sample_type<seq_length>, N> get_data(size_t start_point) noexcept
+{
+    std::array<sample_type<seq_length>, N> data;
+
+    for (size_t i = 0; i < N; ++i) {
+        data[i].first = get_waves<seq_length>(i);
+        data[i].second = get_waves<1>(i + seq_length)[0];
+    }
+
+    return data;
+}
+
+template<size_t N, size_t M>
+inline array2D<N, M> get_weights() noexcept
+{
+    array2D<N, M> data;
+    std::random_device rd;
+    std::mt19937_64 mt_gen(rd());
+    std::uniform_real_distribution<f_type> dist;
+
+    for (size_t i = 0; i < N; ++i) {
+        for (size_t j = 0; j < M; ++j) {
+            data[i][j] = dist(mt_gen);
+        }
+    }
+    return data;
+}
+
+constexpr f_type sigmoid(f_type val) noexcept
+{
+    constexpr f_type one = 1.;
+    return one/(one + (f_type)std::exp(-val));
+}
+
+} // namespace NN
