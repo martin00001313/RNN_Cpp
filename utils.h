@@ -60,4 +60,29 @@ constexpr f_type sigmoid(f_type val) noexcept
     return one/(one + (f_type)std::exp(-val));
 }
 
+template<size_t N>
+constexpr std::array<f_type, N> sigmoid(const std::array<f_type, N>& vec) noexcept
+{
+    std::array<f_type, N> res;
+    for (f_type i : vec) {
+        res[i] = sigmoid(i);
+    }
+    return res;
+}
+
+template<size_t N>
+constexpr std::array<NN::f_type, N> vector_add(const std::array<NN::f_type, N>& a1, const std::array<NN::f_type, N>& a2)
+{
+    std::array<NN::f_type, N> res;
+    for (size_t i = 0; i < N; ++i) {
+        res[i] = a1[i] + a[2];
+    }
+    return res;
+}
+
+template<size_t N, size_t N2, size_t M2>
+std::array<NN::f_type, M2> vector_to_mtx_dot(const std::array<NN::f_type, N>& mtx1, const array2D<N2, M2>& mtx2) noexcept;
+
+template<size_t N1, size_t M1, size_t N2, size_t M2>
+array2D<N1, M2> dot_mul(const array2D<N1, M1>& a1, const array2D<N2, M2>& a2);
 } // namespace NN
