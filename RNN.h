@@ -14,24 +14,24 @@ private:
     NN::array2D<hidden_dim, hidden_dim> hidden_layer;
     NN::array2D<hidden_dim, output_dim> output_layer;
 
-    std::result_of_t<decltype(&NN::get_data<N, seq_length>)(size_t)> train_data;
-    std::result_of_t<decltype(&NN::get_data<V_S, seq_length>)(size_t)> validation_data;
+    using validation_data_type = std::result_of_t<decltype(&NN::get_data<V_S, seq_length>)(size_t)>;
+    using train_data_type = std::result_of_t<decltype(&NN::get_data<N, seq_length>)(size_t)>;
 
 public:
 
     RNN() : input_layer(NN::get_weights<seq_length, hidden_dim>())
         , hidden_layer(NN::get_weights<hidden_dim, hidden_dim>())
         , output_layer(NN::get_weights<hidden_dim, output_dim>())
-        , train_data(NN::get_data<N, seq_length>(0))
-        , validation_data(NN::get_data<V_S, seq_length>(N))
     {
     }
 
     constexpr NN::f_type get_output(const std::array<NN::f_type, seq_length>& entity) const noexcept;
 
-    constexpr NN::f_type get_loss(const NN::sample_type<seq_length>&) const noexcept;
+    constexpr void train_network(train_data_type& data, const validation_data_type& validation_data) noexcept;
 
 private:
+    constexpr NN::f_type get_loss(const NN::sample_type<seq_length>&) const noexcept;
+
     std::array<NN::f_type, hidden_dim> execute_input_layer(const std::array<NN::f_type, seq_length>& entity) const noexcept;
     std::array<NN::f_type, hidden_dim> execute_hidden_layer(const std::array<NN::f_type, hidden_dim>& entity) const noexcept;
     NN::f_type execute_output_layer(const std::array<NN::f_type, hidden_dim>& entity) const noexcept;

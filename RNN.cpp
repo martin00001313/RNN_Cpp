@@ -25,7 +25,41 @@ constexpr NN::f_type RNN::get_output(const std::array<NN::f_type, RNN::seq_lengt
     return res;
 }
 
-constexpr NN::f_type RNN::get_loss(const NN::sample_type<RNN::seq_length>& entiry) const noexcept
+constexpr NN::f_type RNN::get_loss(const NN::sample_type<RNN::seq_length>& entry) const noexcept
 {
-    return entiry.second - get_output(entiry.first);
+    return entry.second - get_output(entry.first);
+}
+
+constexpr void RNN::train_network(train_data_type& data, const validation_data_type& validation_data) noexcept
+{
+    std::array<std::pair<std::array<NN::f_type, hidden_dim>, std::array<NN::f_type, hidden_dim>>, seq_length> layers;
+
+    for (auto& i : data) {
+        auto& cur_input = i.first;
+        const auto& cur_y = i.second;
+
+        decltype(input_layer) du = {0.};
+        decltype(hidden_layer) dw = {0.};
+        decltype(output_layer) dv = {0.};
+
+        decltype(input_layer) du_t = {0.};
+        decltype(hidden_layer) dw_t = {0.};
+        decltype(output_layer) dv_t = {0.};
+
+        decltype(input_layer) du_i = {0.};
+        decltype(hidden_layer) dw_i = {0.};
+
+        // Forward pass
+        for (size_t i = 0; i < seq_length; ++i) {
+            std::remove_const_t<decltype(cur_input)> tmp_data = {0.};
+            tmp_data[i] = cur_input[i];
+            const auto input_res = execute_input_layer(cur);
+            const auto cur_hidden = execute_hidden_layer(input_res);
+            const auto dot_input = NN::vector_to_mtx_dot(cur, input_layer);
+            const auto dot_hidden = NN::vector_to_mtx_dot(prev_state, hidden_layer);
+            const auto sum_vec = NN::vector_add(dot_hidden, dot_input);
+            const auto sg = NN::sigmoid(sum_vec);
+            res = NN::vector_to_mtx_dot(sg, output_layer)[0];
+        }
+    }   
 }
