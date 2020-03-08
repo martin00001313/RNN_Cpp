@@ -27,12 +27,12 @@ public:
     {
     }
 
-    NN::f_type get_output(const std::array<NN::f_type, seq_length>& entity) noexcept;
+    constexpr NN::f_type get_output(const std::array<NN::f_type, seq_length>& entity) const noexcept;
 
-    NN::f_type get_loss() const noexcept;
+    constexpr NN::f_type get_loss(const NN::sample_type<seq_length>&) const noexcept;
 
 private:
-    std::array<NN::f_type, hidden_dim> execute_input_layer(const std::array<NN::f_type, seq_length>& entity) noexcept;
-    std::array<NN::f_type, hidden_dim> execute_hidden_layer(const std::array<NN::f_type, hidden_dim>& entity) noexcept;
-    NN::f_type execute_output_layer(const std::array<NN::f_type, hidden_dim>& entity) noexcept;
+    std::array<NN::f_type, hidden_dim> execute_input_layer(const std::array<NN::f_type, seq_length>& entity) const noexcept;
+    std::array<NN::f_type, hidden_dim> execute_hidden_layer(const std::array<NN::f_type, hidden_dim>& entity) const noexcept;
+    NN::f_type execute_output_layer(const std::array<NN::f_type, hidden_dim>& entity) const noexcept;
 };

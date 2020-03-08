@@ -2,7 +2,7 @@
 
 #include "./RNN.h"
 
-NN::f_type RNN::get_output(const std::array<NN::f_type, RNN::seq_length>& entity) noexcept
+constexpr NN::f_type RNN::get_output(const std::array<NN::f_type, RNN::seq_length>& entity) const noexcept
 {
     std::array<NN::f_type, seq_length> cur{0};
     std::array<NN::f_type, hidden_dim> prev_state{0};
@@ -23,4 +23,9 @@ NN::f_type RNN::get_output(const std::array<NN::f_type, RNN::seq_length>& entity
         prev_state = sg;
     }
     return res;
+}
+
+constexpr NN::f_type RNN::get_loss(const NN::sample_type<RNN::seq_length>& entiry) const noexcept
+{
+    return entiry.second - get_output(entiry.first);
 }
