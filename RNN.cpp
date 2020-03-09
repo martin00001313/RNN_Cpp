@@ -7,14 +7,12 @@ constexpr NN::f_type RNN::get_output(const std::array<NN::f_type, RNN::seq_lengt
     std::array<NN::f_type, seq_length> cur{0};
     std::array<NN::f_type, hidden_dim> prev_state{0};
 
-    NN::f_type res;
+    NN::f_type res = 0.;
     for (size_t i = 0; i < seq_length ; ++i) {
         cur[i] = entity[i];
         if (i != 0) {
             cur[i-1] = 0.;
         }
-        const auto input_res = execute_input_layer(cur);
-        const auto cur_hidden = execute_hidden_layer(input_res);
         const auto dot_input = NN::vector_to_mtx_dot(cur, input_layer);
         const auto dot_hidden = NN::vector_to_mtx_dot(prev_state, hidden_layer);
         const auto sum_vec = NN::vector_add(dot_hidden, dot_input);
@@ -38,6 +36,24 @@ constexpr void RNN::train_network(train_data_type& data, const validation_data_t
         auto& cur_input = i.first;
         const auto& cur_y = i.second;
 
+        NN::f_type n_res = 0.;
+        std::array<NN::f_type, hidden_dim> prev_s = {0.};
+
+        // Forward pass
+        for (size_t i = 0; i < seq_length; ++i) {
+            std::remove_const_t<std::remove_reference_t<decltype(cur_input)>> tmp_data = {0.};
+            tmp_data[i] = cur_input[i];
+            const auto dot_input = NN::vector_to_mtx_dot(tmp_data, input_layer);
+            const auto dot_hidden = NN::vector_to_mtx_dot(prev_s, hidden_layer);
+            const auto sum_vec = NN::vector_add(dot_hidden, dot_input);
+            const auto sg = NN::sigmoid(sum_vec);
+            n_res = NN::vector_to_mtx_dot(sg, output_layer)[0];
+            layers[i].first = sg;
+            layers[i].second = prev_s;
+        }
+        const NN::f_type loss = (n_res - i.second);
+
+        // Backword pass
         decltype(input_layer) du = {0.};
         decltype(hidden_layer) dw = {0.};
         decltype(output_layer) dv = {0.};
@@ -48,18 +64,9 @@ constexpr void RNN::train_network(train_data_type& data, const validation_data_t
 
         decltype(input_layer) du_i = {0.};
         decltype(hidden_layer) dw_i = {0.};
-
-        // Forward pass
-        for (size_t i = 0; i < seq_length; ++i) {
-            std::remove_const_t<decltype(cur_input)> tmp_data = {0.};
-            tmp_data[i] = cur_input[i];
-            const auto input_res = execute_input_layer(cur);
-            const auto cur_hidden = execute_hidden_layer(input_res);
-            const auto dot_input = NN::vector_to_mtx_dot(cur, input_layer);
-            const auto dot_hidden = NN::vector_to_mtx_dot(prev_state, hidden_layer);
-            const auto sum_vec = NN::vector_add(dot_hidden, dot_input);
-            const auto sg = NN::sigmoid(sum_vec);
-            res = NN::vector_to_mtx_dot(sg, output_layer)[0];
+        
+        for (size_t t = 0; t < seq_length; ++t) {
+            
         }
     }   
 }

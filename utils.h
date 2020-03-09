@@ -75,14 +75,42 @@ constexpr std::array<NN::f_type, N> vector_add(const std::array<NN::f_type, N>& 
 {
     std::array<NN::f_type, N> res;
     for (size_t i = 0; i < N; ++i) {
-        res[i] = a1[i] + a[2];
+        res[i] = a1[i] + a2[i];
     }
     return res;
 }
 
 template<size_t N, size_t N2, size_t M2>
-std::array<NN::f_type, M2> vector_to_mtx_dot(const std::array<NN::f_type, N>& mtx1, const array2D<N2, M2>& mtx2) noexcept;
+constexpr std::array<NN::f_type, M2> vector_to_mtx_dot(const std::array<NN::f_type, N>& mtx1, const array2D<N2, M2>& mtx2) noexcept
+{
+    static_assert(N == N2, "Dimensions should be the same!");
+    std::array<NN::f_type, M2> res;
+    for (size_t i = 0; i < M2; ++i) {
+        NN::f_type cur_i = 0.;
+        for (size_t j = 0; j < N; ++j) {
+            cur_i += mtx1[j] * mtx2[j][i];
+        }
+        res[i] = cur_i;
+    }
+
+    return res;
+}
 
 template<size_t N1, size_t M1, size_t N2, size_t M2>
-array2D<N1, M2> dot_mul(const array2D<N1, M1>& a1, const array2D<N2, M2>& a2);
+constexpr array2D<N1, M2> dot_mul(const array2D<N1, M1>& a1, const array2D<N2, M2>& a2) noexcept
+{
+    static_assert(M1 == N2, "Dimensions should be the same!");
+
+    array2D<N1, M2> res;
+    for (size_t i = 0; i < N1; ++i) {
+        NN::f_type cur_val = 0.;
+        for (size_t j = 0; j < M2; ++j) {
+            for (size_t k = 0; k < M1; ++k) {
+                cur_val += a1[i][k] * a2[k][j];
+            }
+            res[i][j] = cur_val;
+        }
+    }
+    return res;
+}
 } // namespace NN
